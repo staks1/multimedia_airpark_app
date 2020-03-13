@@ -1,0 +1,6 @@
+14, City A, 1, 2, 40
+b2, Atlantis, 2, 3, 85
+a30, Rome, 2, 3, 200
+b34, Alexandria, 1, 1, 120
+g45, Switzerland, 2, 3, 900
+D43, Athens, 3, 2, 950
