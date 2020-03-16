@@ -1037,6 +1037,7 @@ category ---i have not done it yet--
         earnLab.setText(Double.toString(0));
         timeLab.setText(totaltime.toString());
         fillLab.setText("no info yet");
+        popLab.setText("");
     }
 
 
