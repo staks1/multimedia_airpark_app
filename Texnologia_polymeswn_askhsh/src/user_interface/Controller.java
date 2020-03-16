@@ -446,6 +446,12 @@ public class Controller
     //will be used later
     static int default_flights=0;
 
+
+
+    //Arraylist for Threads //
+    ArrayList<Timer> timers=new ArrayList<>();
+
+
     //FUNCTION TO CREATE POPUPS FOR DETAILS MENU
     public Stage popupHandler(String textid) {
          VBox comp = new VBox();
@@ -792,6 +798,27 @@ public class Controller
     }
 
 
+    //function to reset the structures //
+    public void cleanLists(){
+        flightext="";
+        delayText="";
+        parktext="";
+        tenText="";
+        holdText="";
+        //CLEAN THE LABS //
+        flightsLanding.clear();
+        flightsDeleted.clear();
+        flightsParked.clear();
+        allParks.clear();
+        zoneC.clear();
+        zoneB.clear();
+        zoneA.clear();
+        gate.clear();
+        commerc.clear();
+        biglength.clear();
+        general.clear();
+
+    }
 
 
 
@@ -813,6 +840,21 @@ public class Controller
        // Flight flights[]=new Flight[1000];
         int counter=0;
         // int counter2=0;
+
+
+        //call cleanLists to reset the structures //
+        cleanLists();
+        starter();
+
+        //check if previous scenario is running //
+        if(!timers.isEmpty()){
+            for(int k=0;k<timers.size();k++){
+                timers.get(k).cancel();
+                timers.get(k).purge();
+            }
+        }
+
+
 
 
 
@@ -974,18 +1016,9 @@ category ---i have not done it yet--
 
 
 
-    // Add a public no-args constructor
-    public Controller(){
+    //function to do initializing in scene //
 
-
-    }
-
-    @FXML
-    private void initialize()
-    {
-        final int initValue=0;
-
-        //set up-initialize details popup
+    public void starter(){
         fStage=popupHandler("flightsDetails");
         pStage=popupHandler("parksDetails");
         dStage=popupHandler("delayDetails");
@@ -1004,6 +1037,27 @@ category ---i have not done it yet--
         earnLab.setText(Double.toString(0));
         timeLab.setText(totaltime.toString());
         fillLab.setText("no info yet");
+    }
+
+
+    // Add a public no-args constructor
+    public Controller(){
+
+
+    }
+
+    @FXML
+    private void initialize()
+    {
+        final int initValue=0;
+
+        //set up-initialize details popup
+            starter();
+
+        //handle threads//
+        //add thread to timer list//
+
+        //timer.schedule(new timeCount(), 0, 5000);
 
 
         //handling menu and submenu !!
@@ -1015,6 +1069,8 @@ category ---i have not done it yet--
 
         //handling load scenario
         loadConf.setOnAction(event->{
+
+            //handling the stuff already running
 
            Stage newStage =new Stage();
            VBox comp =new VBox();
@@ -1071,8 +1127,12 @@ category ---i have not done it yet--
         //implement the main process ---when user presses start //
         startSel.setOnAction(event->{
                 try {
-                    Timer timer = new Timer(true);
-                    timer.schedule(new timeCount(), 0, 5000);
+
+
+                    //Timer timer = new Timer(true);
+                      Timer timer =new Timer();
+                      timers.add(timer);
+                      timer.schedule(new timeCount(), 0, 5000);
 
                     //sort the flights --set priority
                     Collections.sort(flightSet, new Comp());
