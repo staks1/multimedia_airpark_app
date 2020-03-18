@@ -8,11 +8,7 @@ public class Airpark{
     public Integer category; //category of the parking---!8a ginei integer mallon telika
     public long maxtime;    //max parking time
     public float cost;        //cost of usage
-    //private int spaces;    //the number of spaces of this park type
-    public int index;
-    public int flight_index; //the flight that is parked
 
-    /*--oxi sigouros akomh alla vazw ta xarakthristika ka8e kathgorias analoga me ton xwro sta8meyshs --*/
 
     public ArrayList<Integer> fl_type;    //flight type the parking can support,according to category
     public ArrayList<Integer> plane_type; //plane types the parking can support,according to category
@@ -42,11 +38,7 @@ public class Airpark{
     public String getParkid() {
         return parkid;
     }
-/*
-    public void setSpaces(int spaces) {
-        this.spaces = spaces;
-    }
-    */
+
 
     /*set the remaining parameters of each  parking according to category */
     // services : refill , clean , transporting , load ,

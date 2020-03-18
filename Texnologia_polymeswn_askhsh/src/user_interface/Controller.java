@@ -1,25 +1,14 @@
 
 package user_interface;
-
-import java.awt.*;
-import java.awt.TextArea;
 import java.io.*;
-import java.net.URL;
-import java.security.AllPermission;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
-
 import javafx.application.Platform;
-import javafx.beans.property.StringProperty;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
@@ -35,9 +24,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.stage.Popup;
 import javafx.stage.Stage;
 import park.Airpark;
 import park.Flight;
@@ -204,7 +191,7 @@ public class Controller
     private AnchorPane warnPane;
 
 
-    /*******************--------------inner class that adds 1 minute every 5 secs and handles the tasks-----------*************************/
+    /*---inner class that adds 1 minute every 5 secs and handles the tasks---*/
     class timeCount extends TimerTask {
 
         public void run() {
@@ -216,152 +203,37 @@ public class Controller
                         timeLab.setText(ltime.toString());
                         Random random = new Random();
 
-
-
-                        //CHECK FOR FLIGHTS TO LAND //
-                        for (int i = 0; i < flightsLanding.size(); i++) {
-                            if (flightsLanding.get(i).switchStateTime != null && flightsLanding.get(i).switchStateTime.equals(LocalTime.parse(timeLab.getText())) && flightsLanding.get(i).getFlstate().equals("Landing") && !flightsLanding.get(i).getFlstate().equals("Parked") && !flightsLanding.get(i).getFlstate().equals("Departed")) {
-
-                                //turn the flight parked
-                                flightsLanding.get(i).setFlstate("Parked");
-                                //add to parked set
-                                flightsParked.add(flightsLanding.get(i));
-
-
-                                //UPDATE LANDING ANCHORPANE TO DISPLAY THE LANDING FLIGHTS TO THE USER //
-                                ++flightsCount;
-                                arriveLab.setText(String.valueOf(flightsCount));
-
-
-                                //set the actual random departure time//
-                                //set the switchstatetime =time of landing + nxt minutes!
-                                int nxt = random.nextInt(9) + 10;
-                                System.out.println("old time to land" + flightsLanding.get(i).switchStateTime.toString());
-
-                                //set the programmed departure time //
-                                flightsLanding.get(i).progDepTime=flightsLanding.get(i).switchStateTime.plusMinutes(flightsLanding.get(i).deptime);
-
-
-
-                                //set the new departure time
-                                //switchStateTime is changed to the actual departure time now
-                                flightsLanding.get(i).switchStateTime = flightsLanding.get(i).switchStateTime.plusMinutes(nxt);
-                                System.out.println("new time to depart" + flightsLanding.get(i).switchStateTime.toString());
-
-
-
-                                //check if the flight is landing on time /delayed/sooner and update price accordingly
-                                flightsLanding.get(i).setCoefficient(nxt);
-
-
-                                //SET THE PARKING that corresponds to the flight landing  TO RED --RESERVED STATE
-                                Rectangle rec = (Rectangle) parksPane.getScene().lookup("#" + "rec" + flightsLanding.get(i).park_flight_id);
-                                rec.setFill(Color.CRIMSON);
-
-
-                                scrollast.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-                                Glow gl2 = new Glow();
-                                popLab.setEffect(gl2);
-                                scrollast.setFitToHeight(true);
-                                popLab.setText(popLab.getText() + "\nThe flight with id: " + flightsLanding.get(i).flid + " was  parked\n");
-
-
-                                //details menu update //
-                                 flightext=flightext+"\nflight: "+ flightsLanding.get(i).flid + " city "+ flightsLanding.get(i).city + " fltype "+ flightsLanding.get(i).getFltype() + " state "+ flightsLanding.get(i).getFlstate()+"parked in "+ allParks.get(flightsLanding.get(i).index).parkid + "leaves in :"+ flightsLanding.get(i).deptime;
-                                //delayed flights updates
-                                if(nxt>flightsLanding.get(i).deptime) {
-                                    delayText = delayText + "\n" + "Delayed flight with id: " + flightsLanding.get(i).flid + " parked in :" + allParks.get(flightsLanding.get(i).index).getParkid() + " with plane type :" + flightsLanding.get(i).planetype + " with flight type " + flightsLanding.get(i).fltype + " programmed deptime: " + flightsLanding.get(i).deptime;
-                                    System.out.println("\nthe nxt is: "+nxt+" and the cost is: "+flightsLanding.get(i).flight_park_price);
-                                }
-                            }
-                        }
-
-                        //remove the parked flight from the flightset
-                        //SUBSTITUTE WITH REMOVE (NOT REMOVEALL) SOS !!!!
-                        if (!flightsLanding.isEmpty())
-                            flightsLanding.removeAll(flightsParked);
-
-
+                        //park the parks that are due to park now
+                      try {
+                          flightLander();
+                      }catch (Exception k){
+                          k.printStackTrace();
+                      }
 
                         //handle the holding flights now //
                       try {
-                          flightAdder();     //park the holding flights if there are parkings available !
+                          flightAdder();
                       }catch(Exception e){
                           e.printStackTrace();
                       }
 
 
-            /*here maybe implement the flights departing from the airports*/
+            /*handle the flights departing from the airports*/
             /*generate random minutes for departure -- earlier or later departure from the one planned
-             the number must be between 10 and max value=60 !test value !probably change later the max
-               the number */
+             the number must be between 10 and max value=60 !(test value )*/
 
-            Collections.sort(flightsParked,new Comp());
-
-            for(int i=0;i<flightsParked.size();i++){
-                    System.out.println(" the flight with id "+ flightsParked.get(i).flid + " has total parking cost "+ flightsParked.get(i).flight_park_price);
-
-
-                    //check for departures in next 10 minutes
-                    if(flightsParked.get(i).progDepTime.equals(LocalTime.parse(timeLab.getText()).plusMinutes(10))){
-                        ++tenCount;
-                        departLab.setText(String.valueOf(tenCount));
-                        tenText=tenText+"\nflight with id "+flightsParked.get(i).flid+" with flight type "+flightsParked.get(i).fltype+" with plane type "+flightsParked.get(i).planetype;
-                    }
-
-                    //departing flights ->their time has come
-                    if(LocalTime.parse(timeLab.getText()).equals(flightsParked.get(i).switchStateTime) && !flightsParked.get(i).flstate.equals("Departed")){
-                        //add to departing flights
-                        flightsParked.get(i).setFlstate("Departed");
-
-                        if(!flightsDep.contains(flightsParked.get(i)))
-                                flightsDep.add(flightsParked.get(i));
-
-                        //here should check if this works correctly // maybe the index is wrong !
-                        System.out.println("the flight with park -flight id :"+flightsParked.get(i).park_flight_id+"is departing" );
-
-                        //display to the user that the flight is departing//
-                        popLab.setText(popLab.getText() + "\nThe flight with id: " + flightsParked.get(i).flid + " is departing \n");
-
-
-
-
-                        //UPDATE THE COST ADDING THE COST OF THE FLIGHT  DEPARTING TO THE TOTAL COST ANCHORPANE --display to user //
-                        earnLab.setText(String.valueOf(Double.parseDouble(earnLab.getText()) + flightsParked.get(i).flight_park_price));
-
-                        //HERE WE MUST SET THE STATE OF THE CORRESPONDING PARKING TO FREE !//
-                        //use the index that binds this flight to a certain parking from park array//
-                        allParks.get(flightsParked.get(i).index).setParkstate("free");
-
-
-                        //update the available spots //
-                        spotLab.setText(String.valueOf(Integer.parseInt(spotLab.getText())+1));
-
-
-                        //find the reserved parking and set it to free again--green
-                        Rectangle rec = (Rectangle) parksPane.getScene().lookup("#" + "rec" + flightsParked.get(i).park_flight_id);
-                        rec.setFill(Color.MEDIUMSEAGREEN);
-
-                        //update the details --departing flight
-                          flightext="\n DEPARTING flight: "+ flightsParked.get(i).flid + " city "+ flightsParked.get(i).city + " fltype "+ flightsParked.get(i).getFltype() +" and state "+flightsParked.get(i).getFlstate()+" leaves in: "+ flightsParked.get(i).deptime;
-
-
-
-                    }
-
-            }
-
-            if(!flightsParked.isEmpty() && !flightsDep.isEmpty())
-                flightsParked.removeAll(flightsDep);
+                try {
+                    flightDeparter();
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
 
             //update flights details
                 fStage=popupTexter(fStage,flightext,"flightsDetails");
             //update parking details
                 pStage=popupTexter(pStage,parksTexter(),"parksDetails");
-
             //update Delayed Flights details
                 dStage=popupTexter(dStage,delayText,"delayDetails");
-
             //update flights departing in 10 minutes details
                 tStage=popupTexter(tStage,tenText,"tenDetails");
             //update the holding flights details
@@ -372,11 +244,7 @@ public class Controller
     }
 
 
-
-
-
-
-    /*****--another inner class that implements the comparator of flightset priority queue ascending order of flpriority ***************************/
+    /*inner class that implements the comparator of flightset priority queue (ascending order of flpriority)*/
     class Comp implements Comparator<Flight> {
         @Override
         public int compare(Flight f1, Flight f2) {
@@ -386,11 +254,7 @@ public class Controller
 
 
 
-
-
-
-    //creating hashsets for fast search for parkings
-    //and priority queue for flights
+    //initializing the structures that hold the flights /parkings
     HashSet<Airpark> gate=new HashSet<>();
     HashSet<Airpark>  commerc=new HashSet<>();
     HashSet<Airpark>  zoneA=new HashSet<>();
@@ -421,14 +285,14 @@ public class Controller
     //create hashmap to hold the correspondence between flights and parkings //
     HashMap<Airpark,Flight> hm=new HashMap<>();
 
-    //text for details static
+    //text for details texts
     String flightext;
     String parktext;
     String delayText;
     String tenText;
     String holdText;
 
-    //create detailsstages
+    //create details stages
     Stage fStage;
     Stage pStage;
     Stage dStage;
@@ -447,8 +311,7 @@ public class Controller
     static int default_flights=0;
 
 
-
-    //Arraylist for Threads //
+    //Arraylist for Threads (kill the previous each time new scenario is loaded)//
     ArrayList<Timer> timers=new ArrayList<>();
 
 
@@ -464,9 +327,7 @@ public class Controller
         //Scene newScene = new Scene(comp, 500, 500);
         newStage.setScene(newScene);
 
-
         return newStage;
-
 
     }
 
@@ -513,13 +374,13 @@ public class Controller
                 Text text=new Text(airpark.getParkid());
                 StackPane sp=new StackPane();
 
-                //set layouyt of each stackpane so we can draw rectangles in sequence
+                //set layout of each stackpane so we can draw rectangles in sequence
                 sp.setLayoutX(0.0+60*counter);
 
                 //set the stackpanes ids=the airpark ids so we can edit the spaces later(the space is free or reserved !!)
                 sp.setId(airpark.getParkid());
 
-                //set the airparks ids= "rec"+ airpark_ids so we can change them later
+                //set the airparks ids= "rec"+ airpark_ids so we can edit them later
                 rectangle.setId("rec"+airpark.getParkid());
                 sp.getChildren().addAll(rectangle,text);
                 g.getChildren().add(sp);
@@ -531,8 +392,138 @@ public class Controller
 
     }
 
-    //function to implement searching for parkings for each flight in flightset and parking them,notifying user //
-    //FOR THE DEFAULT FLIGHTS //
+    /******************************************/
+    /*function to park the landing flights */
+    public void flightLander() throws Exception{
+        for (int i = 0; i < flightsLanding.size(); i++) {
+            if (flightsLanding.get(i).switchStateTime != null && flightsLanding.get(i).switchStateTime.equals(LocalTime.parse(timeLab.getText())) && flightsLanding.get(i).getFlstate().equals("Landing") && !flightsLanding.get(i).getFlstate().equals("Parked") && !flightsLanding.get(i).getFlstate().equals("Departed")) {
+
+                //turn the flight parked
+                flightsLanding.get(i).setFlstate("Parked");
+                //add to parked set
+                flightsParked.add(flightsLanding.get(i));
+
+
+                //UPDATE LANDING ANCHORPANE TO DISPLAY THE LANDING FLIGHTS TO THE USER //
+                ++flightsCount;
+                arriveLab.setText(String.valueOf(flightsCount));
+
+
+                /*set the actual random departure time,
+                set the switchstatetime =time of landing + nxt minutes,
+                use a predefined interval to produce random time */
+                Random random = new Random();
+                int nxt = random.nextInt(9) + 10;
+                System.out.println("old time to land" + flightsLanding.get(i).switchStateTime.toString());
+
+                //set the programmed departure time //
+                flightsLanding.get(i).progDepTime=flightsLanding.get(i).switchStateTime.plusMinutes(flightsLanding.get(i).deptime);
+
+
+                //set the new departure time
+                //switchStateTime is changed to the actual departure time now
+                flightsLanding.get(i).switchStateTime = flightsLanding.get(i).switchStateTime.plusMinutes(nxt);
+                System.out.println("new time to depart" + flightsLanding.get(i).switchStateTime.toString());
+
+
+                //check if the flight is landing on time /delayed/sooner and update price accordingly
+                flightsLanding.get(i).setCoefficient(nxt);
+
+
+                //SET THE PARKING that corresponds to the flight landing  TO RED --RESERVED STATE
+                Rectangle rec = (Rectangle) parksPane.getScene().lookup("#" + "rec" + flightsLanding.get(i).park_flight_id);
+                rec.setFill(Color.CRIMSON);
+
+
+                scrollast.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+                Glow gl2 = new Glow();
+                popLab.setEffect(gl2);
+                scrollast.setFitToHeight(true);
+                popLab.setText(popLab.getText() + "\nThe flight with id: " + flightsLanding.get(i).flid + " was  parked\n");
+
+
+                //details menu update //
+                flightext=flightext+"\nflight: "+ flightsLanding.get(i).flid + " city "+ flightsLanding.get(i).city + " fltype "+ flightsLanding.get(i).getFltype() + " state "+ flightsLanding.get(i).getFlstate()+"parked in "+ allParks.get(flightsLanding.get(i).index).parkid + "leaves in :"+ flightsLanding.get(i).deptime;
+                //delayed flights updates
+                if(nxt>flightsLanding.get(i).deptime) {
+                    delayText = delayText + "\n" + "Delayed flight with id: " + flightsLanding.get(i).flid + " parked in :" + allParks.get(flightsLanding.get(i).index).getParkid() + " with plane type :" + flightsLanding.get(i).planetype + " with flight type " + flightsLanding.get(i).fltype + " programmed deptime: " + flightsLanding.get(i).deptime;
+                    System.out.println("\nthe nxt is: "+nxt+" and the cost is: "+flightsLanding.get(i).flight_park_price);
+                }
+            }
+        }
+
+        //remove the parked flight from the flightset
+        if (!flightsLanding.isEmpty())
+            flightsLanding.removeAll(flightsParked);
+
+
+    }
+
+
+    /*******************************************/
+    /*function to handle the departing flights */
+    public void flightDeparter() throws Exception{
+        Collections.sort(flightsParked,new Comp());
+
+        for(int i=0;i<flightsParked.size();i++){
+            System.out.println(" the flight with id "+ flightsParked.get(i).flid + " has total parking cost "+ flightsParked.get(i).flight_park_price);
+
+
+            //check for departures in next 10 minutes
+            if(flightsParked.get(i).progDepTime.equals(LocalTime.parse(timeLab.getText()).plusMinutes(10))){
+                ++tenCount;
+                departLab.setText(String.valueOf(tenCount));
+                tenText=tenText+"\nflight with id "+flightsParked.get(i).flid+" with flight type "+flightsParked.get(i).fltype+" with plane type "+flightsParked.get(i).planetype;
+            }
+
+            //departing flights ->their time has come
+            if(LocalTime.parse(timeLab.getText()).equals(flightsParked.get(i).switchStateTime) && !flightsParked.get(i).flstate.equals("Departed")){
+                //add to departing flights
+                flightsParked.get(i).setFlstate("Departed");
+
+                if(!flightsDep.contains(flightsParked.get(i)))
+                    flightsDep.add(flightsParked.get(i));
+
+                //here should check if this works correctly // maybe the index is wrong !
+                System.out.println("the flight with park -flight id :"+flightsParked.get(i).park_flight_id+"is departing" );
+
+                //display to the user that the flight is departing//
+                popLab.setText(popLab.getText() + "\nThe flight with id: " + flightsParked.get(i).flid + " is departing \n");
+
+
+                //UPDATE THE COST ADDING THE COST OF THE FLIGHT  DEPARTING TO THE TOTAL COST ANCHORPANE --display to user //
+                earnLab.setText(String.valueOf(Double.parseDouble(earnLab.getText()) + flightsParked.get(i).flight_park_price));
+
+                //HERE WE MUST SET THE STATE OF THE CORRESPONDING PARKING TO FREE !//
+                //use the index that binds this flight to a certain parking from park array//
+                allParks.get(flightsParked.get(i).index).setParkstate("free");
+
+
+                //update the available spots //
+                spotLab.setText(String.valueOf(Integer.parseInt(spotLab.getText())+1));
+
+
+                //find the reserved parking and set it to free again--green
+                Rectangle rec = (Rectangle) parksPane.getScene().lookup("#" + "rec" + flightsParked.get(i).park_flight_id);
+                rec.setFill(Color.MEDIUMSEAGREEN);
+
+                //update the details --departing flight
+                flightext="\n DEPARTING flight: "+ flightsParked.get(i).flid + " city "+ flightsParked.get(i).city + " fltype "+ flightsParked.get(i).getFltype() +" and state "+flightsParked.get(i).getFlstate()+" leaves in: "+ flightsParked.get(i).deptime;
+
+            }
+
+        }
+
+        if(!flightsParked.isEmpty() && !flightsDep.isEmpty())
+            flightsParked.removeAll(flightsDep);
+
+    }
+
+
+
+    /*function to implement searching for parkings for each flight in flightset and parking them,notifying user
+    This function is used to park only the default_scenario _lights  , not the ontes the user submits */
+
     public void flightChecker() throws Exception{
         boolean found=false;
         int fsize=flightSet.size();
@@ -574,8 +565,6 @@ public class Controller
 
                             //correspond the flight to the used parking
                             hm.put(allParks.get(k),flightSet.get(i));
-
-
 
                             //Set the flight park id the flights id corresponding to the parking reserved //
                             flightSet.get(i).setPark_flight_id(allParks.get(k).getParkid());
@@ -629,18 +618,9 @@ public class Controller
                             //start updating flight details
                             flightext=flightext+"\n Parked flight: "+ flightSet.get(i).flid + " city "+ flightSet.get(i).city + " fltype "+ flightSet.get(i).getFltype() + " state "+ flightSet.get(i).getFlstate()+" parked in "+ allParks.get(flightSet.get(i).index).parkid + " leaves in: "+ flightSet.get(i).deptime;
 
-
-
                         }
-
                     }
-
-
-
-
                 }
-
-
             }
             //if the flight has not found free parking then notify the user on bottom region of site
             if(!found) {
@@ -648,9 +628,7 @@ public class Controller
                 popLab.setEffect(gl);
                 popLab.setText(popLab.getText() + "\nThe flight with id: " + flightSet.get(i).flid + " was not parked and will be ignored !\n");
 
-                //set the flights who have not parked to holding maybe!
-                //On second thought just ignore these flights , we should never work with them
-               // flightSet.get(i).setFlstate("IGNORED");
+                //ignore these holding flights , we should never work with them
                 flightsDeleted.add(flightSet.get(i));
 
             }
@@ -671,7 +649,7 @@ public class Controller
 
     /* second function to add the new user input flights aNd handle their parking
        based on the time to land ,based on planetype
-       FOR THE USER DEFINED FLIGHTS
+       This function is used for the flights the user submits
      */
     public void flightAdder() throws Exception{
         boolean found=false;
@@ -692,8 +670,6 @@ public class Controller
 
                     if ( allParks.get(k).plane_type.contains(flightSet.get(i).planetype) && allParks.get(k).fl_type.contains(flightSet.get(i).fltype) &&  allParks.get(k).pservices.containsAll(flightSet.get(i).services) && allParks.get(k).getParkstate().equals("free")) {
 
-                        //time until departure + landing time <= parking time
-                        //flightSet.get(i).setSwitchStateTime(flightSet.get(i).planetype);
 
                         if (flightSet.get(i).deptime + flightSet.get(i).setSwitchStateTime(flightSet.get(i).planetype)< allParks.get(k).maxtime) {
                             allParks.get(k).setParkstate("reserved");   //se parking as reserved
@@ -725,15 +701,8 @@ public class Controller
                             //set the index of the parking for retrieval later (departure)//
                             flightSet.get(i).index=k;
 
-
-                            //start updating details
-                           // flightext="\n Parked flight: "+ flightSet.get(i).flid + " city "+ flightSet.get(i).city + " fltype "+ flightSet.get(i).getFltype() + " state "+ flightSet.get(i).getFlstate()+" parked in "+ allParks.get(flightSet.get(i).index).parkid+ "leaves in :"+ flightSet.get(i).deptime;
-
-
-
                             //correspond the flight to the used parking
                             hm.put(allParks.get(k),flightSet.get(i));
-
 
 
                             //set the flight's initial parking price (services + parking)  //+ sos if monojet free load
@@ -750,17 +719,9 @@ public class Controller
                                     flightSet.get(i).flight_park_price += 0.05 * allParks.get(k).cost;
                             }
 
-                            //here implement the cost -bonus/extra money to pay for parking and services //
-
-
                             //paint the rectangle -spot red !!it is now reserved
                             Rectangle rec = (Rectangle) parksPane.getScene().lookup("#" + "rec" + allParks.get(k).getParkid());
                             rec.setFill(Color.ORANGERED);
-                            //Node node= parksPane.getScene().lookup(allParks.get(k).getParkid());
-
-                            //continue;
-                            //notify that parking was found and the flight has parked
-
                             found=true;
 
 
@@ -794,7 +755,6 @@ public class Controller
         //sort the flightsLanding according to priority
         Collections.sort(flightsLanding,new Comp());
 
-
     }
 
 
@@ -823,30 +783,24 @@ public class Controller
 
 
 
-//file initialize 
+    /*function to read scenario and create the parkings and flights objects
+    This function also stops the started scenario when a users loads a new one
+    and prepares the one the user submits
+    */
     public void fileInitializer(File f1,File f2,HashSet<Airpark> h0,HashSet<Airpark> h1,HashSet<Airpark> h2,HashSet<Airpark> h3,HashSet<Airpark> h4,HashSet<Airpark> h5,HashSet<Airpark> h6,ArrayList<Flight> h7,ArrayList<Airpark> h8){
         int categ;   //reading category
         int parks=0;     //reading number of parks of this category
         int parkscategcost=0;  //cost for this category parking
         char parkscategid=0; //the general id of this category parkings
-        /*maybe create an arraylist for each parameteter --categ,it has all the catego
-         ries of the created parks ,parks,cost....or a hashtable for each category
-         */
 
 
-        //create array of parks,flight objects for the parkings,flights
-        //so i can loop over them
-        //Airpark airpark[]=new Airpark[1000];
-       // Flight flights[]=new Flight[1000];
         int counter=0;
-        // int counter2=0;
 
-
-        //call cleanLists to reset the structures //
+        //call cleanLists and reset the structures //
         cleanLists();
         starter();
 
-        //check if previous scenario is running //
+        //check if previous scenario is running ,and if it is running kill it !//
         if(!timers.isEmpty()){
             for(int k=0;k<timers.size();k++){
                 timers.get(k).cancel();
@@ -854,20 +808,10 @@ public class Controller
             }
         }
 
-
-
-
-
         File file=f1;
 
 
-
-        /* reading the airport description file */
-/*should put categ,parks,parkscategcost,parkscategid
-of each line into an arrraylist/queue/list to save the info for each
-category ---i have not done it yet--
-*/
-
+        /* reading the airport description file , airport_scenario (must be in right format --> "value1, value2,..") */
         try{
             Scanner sc=new Scanner(file);
             sc.useDelimiter(", |\n");
@@ -878,12 +822,6 @@ category ---i have not done it yet--
                 parks=Integer.parseInt(sc.next()); //spaces of each parking
                 parkscategcost=Integer.parseInt(sc.next()); //cost of parking
                 parkscategid=sc.next().charAt(0); //id of the parking!!!sos must do single value not fot the whole array
-
-           /* sos maybe call the Airport constructor here to create an
-           airpark instance with different parkings for each category
-           --line that i read */
-
-
                 Airpark airpark=null;
 
                 //create the parkings based on initial file
@@ -891,17 +829,18 @@ category ---i have not done it yet--
                     try {
 
                         airpark = new Airpark(categ);
-                        airpark.setParkid(parkscategid + Integer.toString(counter)); //creating the single id for each park object based on category
-                        airpark.categorySetter(); //set category and traits
-                        // airpark[counter].setSpaces(parks); //set number of spaces of this parking
-                        airpark.setCost(parkscategcost);  //!!read int but cost could be float
+                        //creating the single id for each park object based on category
+                        airpark.setParkid(parkscategid + Integer.toString(counter));
+                        //set category and traits
+                        airpark.categorySetter();
+
+                        airpark.setCost(parkscategcost);
                         airpark.setParkstate("free");
 
                         //add to general arraylist
                         h8.add(airpark);
 
-                        //add to hashset according to category
-
+                        //add to hashSet according to category
                         switch (airpark.getCategory()) {
                             case 1:
                                 h0.add(airpark);
@@ -924,8 +863,6 @@ category ---i have not done it yet--
                             case 7:
                                 h6.add(airpark);
                                 break;
-
-
                         }
 
                     }catch(NullPointerException e){
@@ -933,34 +870,25 @@ category ---i have not done it yet--
                     }
 
                 }
-
-                // System.out.printf("%d %d %d %c\n",categ,parks,parkscategcost,parkscategid);
-
             }
 
             sc.close();
 
-
-            /*initializing the current time */
-            /*formatting to show only the hour:minutes:seconds*/
+            /*initializing the current time
+            formatting to show only the hour:minutes:seconds*/
 
             Date datetime =new Date();
             System.out.println(datetime.toString());
             SimpleDateFormat ft =new SimpleDateFormat ("hh:mm:ss a zzz");
             System.out.println(ft.format(datetime));
 
-
-            /*reading the initial flights (these flights are already at the airport to leave)*/
-
+            /*reading the initial flights , setup_scenario (these flights are already at the airport to leave)*/
             String fl_id=null;
             String fl_city=null;
             int fl_type=0;
             int fl_planetype=0;
             int progr_deptime=0;
 
-
-/*here try to call the new scanner to read the setup_scenario.txt/*
-/* ----------*/
 
             File file2=f2;
             int counter2=0;
@@ -980,15 +908,9 @@ category ---i have not done it yet--
                     fl_planetype=Integer.parseInt((splitstring[3]));
                     progr_deptime=Integer.parseInt((splitstring[4]));
 
-             /* sos maybe call the Flight constructor here to create an
-            flight instance with different parameters for each line i read
-            */
-
-                  // flight[counter2]=new Flight(fl_id,fl_planetype,fl_city,fl_type,progr_deptime);
                   Flight flight=new Flight(fl_id,fl_planetype,fl_city,fl_type,progr_deptime,"not stated yet");
                   flight.setFlpriority(Flight.flcount); //set priority counter (smaller is earlier in list)
                   h7.add(flight);  //add to priority queue
-
 
                     System.out.printf("%s %s %d %d %d\n",fl_id,fl_city,fl_type,fl_planetype,progr_deptime);
                     ++counter2;
@@ -997,21 +919,17 @@ category ---i have not done it yet--
 
                 default_flights=counter2;
 
-
             }catch (FileNotFoundException e){
                 e.printStackTrace();
             }catch (IOException e){
                 e.printStackTrace();
             }
 
-
         }catch (FileNotFoundException e){
             e.printStackTrace();
         }catch (IOException e){
             e.printStackTrace();
         }
-
-
     }
 
 
@@ -1040,13 +958,11 @@ category ---i have not done it yet--
         popLab.setText("");
     }
 
-
     // Add a public no-args constructor
-    public Controller(){
+    public Controller(){ }
 
 
-    }
-
+    /*******************************************************/
     @FXML
     private void initialize()
     {
@@ -1055,14 +971,7 @@ category ---i have not done it yet--
         //set up-initialize details popup
             starter();
 
-        //handle threads//
-        //add thread to timer list//
-
-        //timer.schedule(new timeCount(), 0, 5000);
-
-
-        //handling menu and submenu !!
-        //handle exit
+        /*handling exit */
         exitSel.setOnAction(event ->{
            Stage stage =(Stage)upperPane.getScene().getWindow();
            stage.close();
@@ -1070,8 +979,6 @@ category ---i have not done it yet--
 
         //handling load scenario
         loadConf.setOnAction(event->{
-
-            //handling the stuff already running
 
            Stage newStage =new Stage();
            VBox comp =new VBox();
@@ -1086,9 +993,7 @@ category ---i have not done it yet--
            newStage.show();
 
 
-
-           //handle button for submiting the requested scenario !
-            //check if requested scenario-files (FLIGHT,AIRPORT) exist !
+           //handling button for submiting the requested scenario -check if requested scenario-files (FLIGHT,AIRPORT) exist !
            sub.setOnAction(event2->{
                File tempFile1=new File("medialab/airport_"+scenarioField.getText()+".txt");
                File tempFile2=new File("medialab/setup_"+scenarioField.getText()+".txt");
@@ -1107,8 +1012,8 @@ category ---i have not done it yet--
                    according to given files (setup,flights) */
                    fileInitializer(tempFile1,tempFile2,gate,commerc,zoneA,zoneB,zoneC,general,biglength,flightSet,allParks);
 
-                   //create the rectangles-visual representations of the parkings in the scroll-panes
-                   //give the stackpanes,rectangulars the ids of the airparks !!(see function)
+                   /*create the rectangles-visual representations of the parkings in the scroll-panes
+                   give the stackpanes,rectangulars the ids of the airparks !!(see function) */
                    rectangleCreator(gate,scroll0);
                    rectangleCreator(commerc,scroll1);
                    rectangleCreator(zoneA,scroll2);
@@ -1124,43 +1029,29 @@ category ---i have not done it yet--
         });
 
 
-
-        //implement the main process ---when user presses start //
+        //handling start ---when user presses start //
         startSel.setOnAction(event->{
                 try {
-
-
-                    //Timer timer = new Timer(true);
                       Timer timer =new Timer();
                       timers.add(timer);
                       timer.schedule(new timeCount(), 0, 5000);
 
                     //sort the flights --set priority
                     Collections.sort(flightSet, new Comp());
-                    //begin searching
-                    LocalTime loc;
-                    loc = LocalTime.parse(timeLab.getText());
-
-                    //call the function to find parkings for the flights in the set !
-
+                    //call the function to find parkings for the  default scenario flights
                     flightChecker();
-
 
                 }catch (ArrayIndexOutOfBoundsException e){
                         e.printStackTrace();
                 }catch (Exception p){
                     p.printStackTrace();
                 }
-
         });
 
 
 
-        //implement the user-input handle ..whe user enters new flights !!!
+        //handling flights submitting ..whe user enters new flights
         submitButt.setOnAction(event->{
-                //read user inputs and check if they are ok
-           // Boolean ok=true;
-
             try {
                 String inflid = idInput.getText();
                 String incity = cityInput.getText();
@@ -1174,9 +1065,8 @@ category ---i have not done it yet--
                     a.setContentText("planetype and flighttype can only be 1 ,2 or 3");
                     a.show();
                 }
-                else   //create flight,add the extra services and  add to flightset !!
-
-                {   //set the starter state of this flight to "holding" as default
+                else
+                {
                     Flight inflight=new Flight(inflid,inpltype,incity,infltype,inprogdeptime,"not stated yet");
                     inflight.setFlpriority(Flight.flcount);
 
@@ -1198,21 +1088,12 @@ category ---i have not done it yet--
                     //sort based on the new flights added
                     Collections.sort(flightSet,new Comp());
 
-
-
-
                     for(Flight flight:flightSet){
                         System.out.println("flight with id: "+inflight.flid+"pr: " + inflight.getFlpriority() + " city "+ inflight.city);
                     }
 
-
                 flightAdder();
-
                 }
-
-
-
-
 
             }catch(Exception e){
                 e.printStackTrace();
@@ -1220,49 +1101,29 @@ category ---i have not done it yet--
                 a.setContentText("wrong input, please type correct input and do not leave any form field empty!");
                 a.show();
             }
-
-
-
         });
 
 
         //handle Gates button //
         gateSel.setOnAction(eventer-> {
             pStage.show();
-
         });
-
-
-
         //handle Flights button//
         flightSel.setOnAction(eventer->{
             fStage.show();
-
         });
-
-
         //handle Delayed flights//
         delaySel.setOnAction(eventer->{
             dStage.show();
-
         });
-
-
-
         //handle flights departing in 10
         departSel.setOnAction(eventer->{
             tStage.show();
-
         });
-
         //handle holding flights //
         holdSel.setOnAction(eventer->{
             hStage.show();
         });
     }
 
-
-
-
 }
-

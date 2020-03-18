@@ -18,7 +18,7 @@ public class Flight {
     public double flight_park_price=0; //the price for the parking,services that the flight reserved !
     public int index;//the index of the parking corresponding to this flight parked
     public LocalTime progDepTime; //programmed departure time -->it is calculated as : landing time(initial switchStateTime) + deptime minutes
-    public LocalTime firstContact=null;
+    public LocalTime firstContact=null; //first contact time to be used for holding flights
 
 
 
@@ -29,7 +29,7 @@ public class Flight {
         this.flstate=flstate;
         this.deptime=deptime;
         this.flid=flid;
-        flcount=flcount+1; //use this static counter to set each flight priority according to creation
+        flcount=flcount+1; //use this static counter to set each flight priority according to creation time
         services=new ArrayList<String>();
 
     }
@@ -47,25 +47,14 @@ public class Flight {
         return flpriority;
     }
 
-    public int getPlanetype() {
-        return  this.planetype;
-    }
 
-    /*not sure yet -- a function to check if a jet is monojet ,returns boolean to check for ****load/unload**** service later*/
+    /*a function to check if a jet is monojet ,returns boolean to check for ****load/unload**** service later*/
     public boolean checkJet(){
-        if(planetype.equals(1))
-           return  true;
-        else
-            return false;
+        return planetype.equals(1);
     }
-
 
     public Integer getFltype() {
         return fltype;
-    }
-
-    public String getPark_flight_id() {
-        return park_flight_id;
     }
 
     public int setSwitchStateTime(Integer planetype) {
@@ -96,11 +85,6 @@ public class Flight {
         else if(this.deptime-realDepartime >= 10 & this.deptime-realDepartime <=20)
             this.flight_park_price=0.9*this.flight_park_price;
     }
-
-
-
-
-
 
 
 }
