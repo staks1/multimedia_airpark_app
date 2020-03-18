@@ -769,6 +769,7 @@ public class Controller
         flightsLanding.clear();
         flightsDeleted.clear();
         flightsParked.clear();
+        flightSet.clear();
         allParks.clear();
         zoneC.clear();
         zoneB.clear();
