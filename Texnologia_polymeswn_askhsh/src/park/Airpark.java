@@ -27,10 +27,6 @@ public class Airpark{
         this.cost = cost;
     }
 
-    public float getCost() {
-        return cost;
-    }
-
     public void setParkid(String parkid) {
         this.parkid = parkid;
     }

@@ -32,75 +32,12 @@ import park.Flight;
 
 public class Controller
 {
-
-    //initializing all the AnchorPanes
-    @FXML
-    private AnchorPane topPane;
-    @FXML
-    private Label appTitle;
     @FXML
     private AnchorPane upperPane;
-    @FXML
-    private MenuButton menu;
-    @FXML
-    private MenuButton deTails;
-    @FXML
-    private AnchorPane middlePane;
-    @FXML
-    private GridPane statsPane;
-    @FXML
-    private TitledPane arrivalPane;
-    @FXML
-    private TitledPane spotPane;
-    @FXML
-    private TitledPane departPane;
-    @FXML
-    private TitledPane earnPane;
-    @FXML
-    private TitledPane timePane;
-    @FXML
-    private AnchorPane lowerPane;
-    @FXML
-    private GridPane splitPane;
-    @FXML
-    private GridPane formPane;
-    @FXML
-    private AnchorPane bottomPane;
 
-
-    //initializing the parks optimization grid ( that shows the parks and if they are free or used)
-    //all accordions
     @FXML
     private GridPane parksPane;
-    @FXML
-    private Accordion accord0;
-    @FXML
-    private Accordion accord1;
-    @FXML
-    private Accordion accord2;
-    @FXML
-    private Accordion accord3;
-    @FXML
-    private Accordion accord4;
-    @FXML
-    private Accordion accord5;
-    @FXML
-    private Accordion accord6;
-    //all titled panes
-    @FXML
-    private TitledPane pane0;
-    @FXML
-    private TitledPane pane1;
-    @FXML
-    private TitledPane pane2;
-    @FXML
-    private TitledPane pane3;
-    @FXML
-    private TitledPane pane4;
-    @FXML
-    private TitledPane pane5;
-    @FXML
-    private TitledPane pane6;
+
     //all scroll panes
     @FXML
     private ScrollPane scroll0;
@@ -125,8 +62,6 @@ public class Controller
     private MenuItem loadConf;
     @FXML
     private MenuItem exitSel;
-    //@FXML
-    //private MenuItem detailMenu=null;
     //details submenu
     @FXML
     private MenuItem gateSel;
@@ -203,7 +138,7 @@ public class Controller
                         timeLab.setText(ltime.toString());
                         Random random = new Random();
 
-                        //park the parks that are due to park now
+                      //park the flights that are due to park now
                       try {
                           flightLander();
                       }catch (Exception k){
@@ -218,10 +153,7 @@ public class Controller
                       }
 
 
-            /*handle the flights departing from the airports*/
-            /*generate random minutes for departure -- earlier or later departure from the one planned
-             the number must be between 10 and max value=60 !(test value )*/
-
+                 /*handle the flights departing from the airports*/
                 try {
                     flightDeparter();
                 }catch(Exception e){
@@ -307,7 +239,6 @@ public class Controller
 
 
     //counter to count the number of default_scenario_flights:
-    //will be used later
     static int default_flights=0;
 
 
@@ -323,9 +254,7 @@ public class Controller
          Label gText = new Label("");
          gText.setId(textid);
          comp.getChildren().add(gText);
-
-        //Scene newScene = new Scene(comp, 500, 500);
-        newStage.setScene(newScene);
+         newStage.setScene(newScene);
 
         return newStage;
 
@@ -443,10 +372,10 @@ public class Controller
 
 
                 //details menu update //
-                flightext=flightext+"\nflight: "+ flightsLanding.get(i).flid + " city "+ flightsLanding.get(i).city + " fltype "+ flightsLanding.get(i).getFltype() + " state "+ flightsLanding.get(i).getFlstate()+"parked in "+ allParks.get(flightsLanding.get(i).index).parkid + "leaves in :"+ flightsLanding.get(i).deptime;
+                flightext=flightext+"\nflight: "+ flightsLanding.get(i).flid + " city "+ flightsLanding.get(i).city + " fltype "+ flightsLanding.get(i).getFltype() + " state "+ flightsLanding.get(i).getFlstate()+" parked in "+ allParks.get(flightsLanding.get(i).index).parkid + "leaves in :"+ flightsLanding.get(i).deptime;
                 //delayed flights updates
                 if(nxt>flightsLanding.get(i).deptime) {
-                    delayText = delayText + "\n" + "Delayed flight with id: " + flightsLanding.get(i).flid + " parked in :" + allParks.get(flightsLanding.get(i).index).getParkid() + " with plane type :" + flightsLanding.get(i).planetype + " with flight type " + flightsLanding.get(i).fltype + " programmed deptime: " + flightsLanding.get(i).deptime;
+                    delayText = delayText + "\n" + "Delayed flight with id: " + flightsLanding.get(i).flid + " parked in: " + allParks.get(flightsLanding.get(i).index).getParkid() + " with plane type: " + flightsLanding.get(i).planetype + " with flight type " + flightsLanding.get(i).fltype + " programmed deptime: " + flightsLanding.get(i).deptime;
                     System.out.println("\nthe nxt is: "+nxt+" and the cost is: "+flightsLanding.get(i).flight_park_price);
                 }
             }
@@ -455,7 +384,6 @@ public class Controller
         //remove the parked flight from the flightset
         if (!flightsLanding.isEmpty())
             flightsLanding.removeAll(flightsParked);
-
 
     }
 
@@ -485,7 +413,7 @@ public class Controller
                     flightsDep.add(flightsParked.get(i));
 
                 //here should check if this works correctly // maybe the index is wrong !
-                System.out.println("the flight with park -flight id :"+flightsParked.get(i).park_flight_id+"is departing" );
+                System.out.println("the flight with park -flight id: "+flightsParked.get(i).park_flight_id+" is departing" );
 
                 //display to the user that the flight is departing//
                 popLab.setText(popLab.getText() + "\nThe flight with id: " + flightsParked.get(i).flid + " is departing \n");
@@ -545,8 +473,8 @@ public class Controller
                 for ( int k = 0; k < psize && !found; k++) {
 
                     if (allParks.get(k)!=null &&  allParks.get(k).plane_type.contains(flightSet.get(i).planetype) && allParks.get(k).fl_type.contains(flightSet.get(i).fltype) && allParks.get(k).getParkstate().equals("free")) {
-                        //must have (hour of arrival + minutes to depart )-(hour of arrival) <= max parking duration
-                        // if (((loc.getMinute() + 60 * loc.getHour()) + flightSet.get(i).deptime) - (loc.getMinute() + 60 * loc.getHour()) < allParks.get(k).maxtime) {
+
+
 
                         if (flightSet.get(i).deptime < allParks.get(k).maxtime) {
                             allParks.get(k).setParkstate("reserved");   //se parking as reserved
@@ -558,7 +486,7 @@ public class Controller
                             //add to parked flights arraylist
                             flightsParked.add(flightSet.get(i));
 
-                            /*set the allparks parking index to index of the reserved parking--used later for retrieving
+                            /*set the allparks parking index to index of the reserved parking,used later for retrieving
                              the actual parking to-->set the state to free again when flight departs*/
                             flightSet.get(i).index=k;
 
@@ -593,7 +521,7 @@ public class Controller
 
                             //update delayed flights
                             if(nxt>flightSet.get(i).deptime)
-                                delayText=delayText+"\n"+"Delayed flight with id: "+flightSet.get(i).flid +" parked in :"+allParks.get(flightSet.get(i).index).getParkid()+" with plane type :"+flightSet.get(i).planetype +" with flight type "+flightSet.get(i).fltype+" programmed deptime: " +flightSet.get(i).deptime;
+                                delayText=delayText+"\n"+"Delayed flight with id: "+flightSet.get(i).flid +" parked in: "+allParks.get(flightSet.get(i).index).getParkid()+" with plane type: "+flightSet.get(i).planetype +" with flight type "+flightSet.get(i).fltype+" programmed deptime: " +flightSet.get(i).deptime;
 
 
                             //TESTING THE COST UPDATE
@@ -604,13 +532,8 @@ public class Controller
                             //paint the rectangle -spot red !!it is now reserved
                             Rectangle rec = (Rectangle) parksPane.getScene().lookup("#" + "rec" + allParks.get(k).getParkid());
                             rec.setFill(Color.CRIMSON);
-                            //Node node= parksPane.getScene().lookup(allParks.get(k).getParkid());
                             found=true;
-                            //continue;
-                            //notify that parking was found and the flight has parked
-
                             scrollast.setFitToHeight(true);
-                           // scrollast.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
                             Glow gl = new Glow();
                             popLab.setEffect(gl);
                             popLab.setText(popLab.getText() + "\nThe flight with id: " + flightSet.get(i).flid + " was  parked\n");
@@ -672,13 +595,13 @@ public class Controller
 
 
                         if (flightSet.get(i).deptime + flightSet.get(i).setSwitchStateTime(flightSet.get(i).planetype)< allParks.get(k).maxtime) {
-                            allParks.get(k).setParkstate("reserved");   //se parking as reserved
+                            allParks.get(k).setParkstate("reserved");
 
                             //update available spots //
                             spotLab.setText(String.valueOf(Integer.parseInt(spotLab.getText())-1));
 
 
-                            flightSet.get(i).setFlstate("Landing");  //set flight as LANDING
+                            flightSet.get(i).setFlstate("Landing");
 
 
                             Glow gl = new Glow();
@@ -687,7 +610,6 @@ public class Controller
 
 
                             //wait the extra minutes before filling the parkings
-                           // LocalTime temptime=LocalTime.parse(timeLab.getText());
                             flightSet.get(i).switchStateTime=LocalTime.parse(timeLab.getText()).plusMinutes(flightSet.get(i).setSwitchStateTime(flightSet.get(i).planetype));
 
 
@@ -705,7 +627,7 @@ public class Controller
                             hm.put(allParks.get(k),flightSet.get(i));
 
 
-                            //set the flight's initial parking price (services + parking)  //+ sos if monojet free load
+                            //set the flight's initial parking price (services + parking)  //if monojet free load
                             //cost of parking + coefficient based on the services !!
                             if(flightSet.get(i).flight_park_price==0) {
                                 flightSet.get(i).flight_park_price = allParks.get(k).cost;
@@ -723,7 +645,6 @@ public class Controller
                             Rectangle rec = (Rectangle) parksPane.getScene().lookup("#" + "rec" + allParks.get(k).getParkid());
                             rec.setFill(Color.ORANGERED);
                             found=true;
-
 
                         }
 
@@ -765,7 +686,7 @@ public class Controller
         parktext="";
         tenText="";
         holdText="";
-        //CLEAN THE LABS //
+        //reset labs and counters
         flightsLanding.clear();
         flightsDeleted.clear();
         flightsParked.clear();
@@ -778,7 +699,8 @@ public class Controller
         commerc.clear();
         biglength.clear();
         general.clear();
-
+        tenCount=0;
+        flightsCount=0;
     }
 
 
@@ -810,7 +732,6 @@ public class Controller
         }
 
         File file=f1;
-
 
         /* reading the airport description file , airport_scenario (must be in right format --> "value1, value2,..") */
         try{
@@ -875,9 +796,7 @@ public class Controller
 
             sc.close();
 
-            /*initializing the current time
-            formatting to show only the hour:minutes:seconds*/
-
+            /*initializing the current time*/
             Date datetime =new Date();
             System.out.println(datetime.toString());
             SimpleDateFormat ft =new SimpleDateFormat ("hh:mm:ss a zzz");
@@ -936,7 +855,6 @@ public class Controller
 
 
     //function to do initializing in scene //
-
     public void starter(){
         fStage=popupHandler("flightsDetails");
         pStage=popupHandler("parksDetails");
@@ -946,8 +864,6 @@ public class Controller
 
 
         //initializing the stats values to 0 (flights arriving,spots available ,flights programmed in 10',total income...)
-        //initialize the total time to time_date format! so we can add minutes later
-
         DateTimeFormatter formater = DateTimeFormatter.ofPattern("HH:mm");
         LocalTime totaltime = LocalTime.parse("00:00");
         arriveLab.setText(Integer.toString(0));
@@ -963,19 +879,24 @@ public class Controller
     public Controller(){ }
 
 
-    /*******************************************************/
+    /**************** INITIALIZE APP ***************************************/
     @FXML
     private void initialize()
     {
         final int initValue=0;
 
-        //set up-initialize details popup
             starter();
 
         /*handling exit */
         exitSel.setOnAction(event ->{
            Stage stage =(Stage)upperPane.getScene().getWindow();
            stage.close();
+            if(!timers.isEmpty()){
+                for(int k=0;k<timers.size();k++){
+                    timers.get(k).cancel();
+                    timers.get(k).purge();
+                }
+            }
         });
 
         //handling load scenario
@@ -1014,7 +935,7 @@ public class Controller
                    fileInitializer(tempFile1,tempFile2,gate,commerc,zoneA,zoneB,zoneC,general,biglength,flightSet,allParks);
 
                    /*create the rectangles-visual representations of the parkings in the scroll-panes
-                   give the stackpanes,rectangulars the ids of the airparks !!(see function) */
+                   give the stackpanes,rectangLes the ids of the airparks */
                    rectangleCreator(gate,scroll0);
                    rectangleCreator(commerc,scroll1);
                    rectangleCreator(zoneA,scroll2);
@@ -1022,7 +943,6 @@ public class Controller
                    rectangleCreator(zoneC,scroll4);
                    rectangleCreator(general,scroll5);
                    rectangleCreator(biglength,scroll6);
-
                }
 
            });
