@@ -29,7 +29,7 @@ public class Main extends Application {
 
 
         // Path to the FXML File
-        String fxmlDocPath = "/home/st/IdeaProjects/Texnologia_polymeswn_askhsh/src/user_interface/park_test_renew.fxml";
+        String fxmlDocPath = "src/user_interface/park_test_renew.fxml";
         FileInputStream fxmlStream = new FileInputStream(fxmlDocPath);
 
         try{

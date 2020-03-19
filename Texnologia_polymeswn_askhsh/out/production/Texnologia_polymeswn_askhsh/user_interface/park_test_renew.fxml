@@ -259,7 +259,7 @@
           <children>
               <ScrollPane fx:id="scrollast" prefHeight="190.0" prefWidth="400.0">
                   <content>
-                      <AnchorPane fx:id ="warnPane"   prefHeight="500" prefWidth="500">
+                      <AnchorPane fx:id ="warnPane"    prefHeight="Infinity" prefWidth="500">
                           <children>
                               <Label fx:id="popLab" layoutX="25.0" layoutY="22.0" prefHeight="900" prefWidth="900" text="" />
                           </children>
